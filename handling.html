@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKYFLOW | Baggage Operations</title>
+
+    <link rel="stylesheet" href="handling.css">
+</head>
+
+<body>
+
+    <!-- BACKGROUND VIDEO -->
+    <video class="background-video" autoplay muted loop playsinline>
+        <source src="airport-bg.mp4" type="video/mp4">
+    </video>
+
+    <div class="video-overlay"></div>
+
+    <!-- MAIN APPLICATION -->
+    <main class="dashboard">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+
+            <div class="brand">
+                <div class="brand-icon">✈</div>
+
+                <div>
+                    <h1>SKYFLOW</h1>
+                    <span>BAGGAGE OPERATIONS CONTROL</span>
+                </div>
+            </div>
+
+            <div class="live-status">
+                <span class="status-dot"></span>
+                SYSTEM LIVE
+            </div>
+
+        </header>
+
+
+        <!-- HERO -->
+        <section class="hero">
+
+            <div class="hero-text">
+
+                <span class="eyebrow">AIRPORT BAGGAGE HANDLING</span>
+
+                <h2>
+                    Track the journey of
+                    <span>every bag.</span>
+                </h2>
+
+                <p>
+                    A simulated baggage workflow showing how luggage
+                    moves through critical airport handling stages.
+                </p>
+
+            </div>
+
+            <div class="flight-card">
+
+                <div class="flight-top">
+                    <span>ACTIVE FLIGHT</span>
+                    <strong>AI 203</strong>
+                </div>
+
+                <div class="route">
+                    <div>
+                        <strong>ATQ</strong>
+                        <small>Amritsar</small>
+                    </div>
+
+                    <div class="flight-line">
+                        ✈
+                    </div>
+
+                    <div>
+                        <strong>DEL</strong>
+                        <small>Delhi</small>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- BAG INFORMATION -->
+        <section class="info-grid">
+
+            <div class="glass-card bag-card">
+
+                <div class="card-label">
+                    BAG IDENTIFICATION
+                </div>
+
+                <div class="bag-id">
+                    BG-20481
+                </div>
+
+                <div class="bag-details">
+
+                    <div>
+                        <span>TYPE</span>
+                        <strong>CHECKED BAG</strong>
+                    </div>
+
+                    <div>
+                        <span>WEIGHT</span>
+                        <strong>18.4 KG</strong>
+                    </div>
+
+                    <div>
+                        <span>STATUS</span>
+                        <strong class="green">IN TRANSIT</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="glass-card progress-card">
+
+                <div class="card-header">
+                    <span>JOURNEY PROGRESS</span>
+                    <strong id="progressText">16%</strong>
+                </div>
+
+                <div class="progress-bar">
+                    <div id="progressFill"></div>
+                </div>
+
+                <div class="progress-info">
+                    <span id="currentStage">Check-In</span>
+                    <span id="nextStage">Next: Security Screening</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- BAGGAGE JOURNEY -->
+        <section class="journey-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="eyebrow">LIVE WORKFLOW</span>
+                    <h3>Baggage Handling Journey</h3>
+                </div>
+
+                <span class="bag-location" id="location">
+                    Registration Counter
+                </span>
+
+            </div>
+
+
+            <div class="journey-track">
+
+                <div class="track-line"></div>
+
+                <div class="bag-marker" id="bagMarker">
+                    🧳
+                </div>
+
+
+                <div class="checkpoint completed">
+
+                    <div class="checkpoint-icon">✓</div>
+
+                    <strong>CHECK-IN</strong>
+
+                    <span>Registration</span>
+
+                </div>
+
+
+                <div class="checkpoint">
+
+                    <div class="checkpoint-icon">2</div>
+
+                    <strong>SECURITY</strong>
+
+                    <span>Screening</span>
+
+                </div>
+
+
+                <div class="checkpoint">
+
+                    <div class="checkpoint-icon">3</div>
+
+                    <strong>SORTING</strong>
+
+                    <span>Sorting Hub</span>
+
+                </div>
+
+
+                <div class="checkpoint">
+
+                    <div class="checkpoint-icon">4</div>
+
+                    <strong>CONVEYOR</strong>
+
+                    <span>Movement</span>
+
+                </div>
+
+
+                <div class="checkpoint">
+
+                    <div class="checkpoint-icon">5</div>
+
+                    <strong>LOADING</strong>
+
+                    <span>Loading Bay</span>
+
+                </div>
+
+
+                <div class="checkpoint">
+
+                    <div class="checkpoint-icon">6</div>
+
+                    <strong>AIRCRAFT</strong>
+
+                    <span>AI-203</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CONTROL PANEL -->
+        <section class="control-grid">
+
+            <div class="glass-card current-card">
+
+                <div class="small-title">
+                    CURRENT HANDLING STAGE
+                </div>
+
+                <h3 id="currentTitle">
+                    Check-In
+                </h3>
+
+                <p id="currentDescription">
+                    Baggage has been registered and associated
+                    with flight AI 203.
+                </p>
+
+                <div class="location-box">
+                    📍 <span id="currentLocation">
+                        Registration Counter
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="glass-card controls">
+
+                <div class="small-title">
+                    SIMULATION CONTROL
+                </div>
+
+                <button onclick="startSimulation()" class="primary-btn">
+                    ▶ Start Journey
+                </button>
+
+                <button onclick="nextStage()" class="secondary-btn">
+                    Move to Next Stage →
+                </button>
+
+                <button onclick="resetSimulation()" class="reset-btn">
+                    ↻ Reset
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- ACTIVITY LOG -->
+        <section class="glass-card activity">
+
+            <div class="activity-header">
+
+                <div>
+                    <span class="eyebrow">SYSTEM LOG</span>
+                    <h3>Journey Activity</h3>
+                </div>
+
+                <span class="live-status">
+                    LIVE
+                </span>
+
+            </div>
+
+            <div id="activityLog">
+
+                <div class="log-item">
+
+                    <span class="log-dot"></span>
+
+                    <div>
+                        <strong>Baggage registered</strong>
+                        <p>Bag BG-20481 entered the handling system.</p>
+                    </div>
+
+                    <time>NOW</time>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <footer>
+            SKYFLOW • SIMULATED AIRPORT BAGGAGE HANDLING SYSTEM
+        </footer>
+
+    </main>
+
+
+    <script src="handling.js"></script>
+
+</body>
+</html>
