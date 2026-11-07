@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#070b12">
+<title>SKYFLOW | Baggage Registration</title>
+<style>
+:root{
+ --bg:#070b12;--panel:rgba(13,24,43,.84);--panel2:rgba(15,31,56,.76);
+ --line:rgba(91,151,230,.22);--blue:#287cff;--cyan:#55c7ff;
+ --muted:#91a2ba;--text:#f4f8ff;--green:#37d69a;--amber:#ffb454;
+ --shadow:0 18px 55px rgba(0,0,0,.28)
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+ background:radial-gradient(ellipse at 75% 17%,rgba(20,91,190,.23),transparent 34%),radial-gradient(ellipse at 12% 48%,rgba(16,71,148,.16),transparent 36%),var(--bg);letter-spacing:.01em}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;background-image:linear-gradient(rgba(90,140,210,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(90,140,210,.07) 1px,transparent 1px);background-size:54px 54px;mask-image:linear-gradient(to bottom,black,transparent 80%)}
+button,input,select{font:inherit}button{cursor:pointer}
+.shell{width:min(1380px,calc(100% - 48px));margin:auto;position:relative}
+nav{height:78px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(119,160,215,.12)}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.13em;font-size:14px}
+.brand-mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#328bff,#0750d8);display:grid;place-items:center;box-shadow:0 6px 22px #1266dc66;font-size:20px}
+.live{font-size:10px;letter-spacing:.18em;color:#a5b5ca;display:flex;align-items:center;gap:9px}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:28px;padding:48px 0 26px}
+.eyebrow{font-size:10px;letter-spacing:.22em;color:#65aaff;font-weight:800;margin-bottom:14px}
+h1{font-size:clamp(34px,5vw,56px);line-height:1.03;letter-spacing:-.045em;margin:0;max-width:760px}
+.gradient{background:linear-gradient(90deg,#55c9ff,#3481ff 70%);color:transparent;background-clip:text}
+.hero p{color:#a3b2c7;line-height:1.65;max-width:660px;font-size:13px;margin:15px 0 0}
+.system-card{min-width:205px;padding:17px 19px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(135deg,rgba(20,53,91,.76),rgba(10,20,36,.8));box-shadow:var(--shadow)}
+.system-card small,.label{font-size:9px;letter-spacing:.16em;color:#8fa7c6;font-weight:800}
+.system-card strong{display:block;margin-top:9px;font-size:19px}
+.system-card span{font-size:10px;color:var(--green)}
+.panel{border:1px solid var(--line);background:linear-gradient(135deg,rgba(17,35,61,.9),rgba(9,17,31,.9));border-radius:18px;box-shadow:var(--shadow);backdrop-filter:blur(14px)}
+.bagbar{display:grid;grid-template-columns:1.5fr repeat(4,1fr);align-items:center;padding:17px 21px;gap:15px;position:relative;overflow:hidden}
+.bagbar:after{content:"";position:absolute;width:320px;height:140px;right:20%;top:-95px;background:#1c74ff33;filter:blur(45px);pointer-events:none}
+.bag-id{display:flex;align-items:center;gap:13px}.bag-icon{width:43px;height:43px;display:grid;place-items:center;border-radius:13px;background:#1455a644;border:1px solid #3e8dff44;color:#72caff;font-size:22px}
+.bag-id strong{font-size:20px;display:block;margin-top:5px;letter-spacing:.02em}
+.metric{border-left:1px solid rgba(127,166,217,.13);padding-left:16px;min-width:0}
+.metric b{display:block;font-size:12px;margin-top:7px;white-space:nowrap}
+.content-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.75fr);gap:16px;margin:24px 0 18px}
+.form-panel,.preview-panel{padding:23px}
+.section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:19px}
+.section-heading h2{font-size:17px;margin:0}.section-heading p{font-size:10px;color:var(--muted);margin:6px 0 0}
+.step-tag{font-size:9px;letter-spacing:.12em;color:#83caff;background:#287cff18;border:1px solid #287cff44;border-radius:7px;padding:7px 9px;white-space:nowrap}
+.form-section{padding:17px 0;border-top:1px solid #ffffff12}
+.form-section:first-of-type{border-top:0;padding-top:0}
+.form-section-title{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.form-section-title .number{width:25px;height:25px;border-radius:8px;display:grid;place-items:center;background:#1765df2b;border:1px solid #348bff55;color:#75caff;font-size:10px;font-weight:800}
+.form-section-title h3{font-size:12px;margin:0;letter-spacing:.04em}
+.form-section-title small{font-size:9px;color:#8097b5;margin-left:auto;letter-spacing:.1em}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.field.full{grid-column:1/-1}
+.field label{font-size:9px;color:#9bb0ca;letter-spacing:.12em;font-weight:800}
+.field input,.field select{width:100%;background:#091525;border:1px solid rgba(91,151,230,.23);border-radius:9px;padding:11px 12px;color:#eef6ff;outline:none;font-size:11px;min-height:40px}
+.field input::placeholder{color:#60758f}
+.field input:focus,.field select:focus{border-color:#368dff;box-shadow:0 0 0 3px #287cff1b}
+.field input[readonly]{color:#79caff;background:#0b1b30;border-color:#287cff55;font-weight:800;letter-spacing:.04em}
+.hint{font-size:9px;color:#7188a5;line-height:1.5}
+.form-actions{display:flex;align-items:center;gap:10px;margin-top:19px;flex-wrap:wrap}
+.primary-btn,.secondary-btn{border:0;border-radius:10px;padding:12px 16px;font-size:10px;font-weight:800;letter-spacing:.12em;transition:.2s}
+.primary-btn{color:white;background:linear-gradient(100deg,#1765df,#268cff);box-shadow:0 8px 20px #1265df40}
+.primary-btn:hover{filter:brightness(1.14);transform:translateY(-1px)}
+.secondary-btn{background:#ffffff0d;color:#b8c9df;border:1px solid var(--line)}
+.preview-panel{position:relative;overflow:hidden}
+.preview-panel:before{content:"";position:absolute;width:230px;height:230px;right:-110px;top:70px;background:#1765df22;filter:blur(55px);pointer-events:none}
+.preview-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}
+.preview-top h2{font-size:16px;margin:0}.live-pill{font-size:8px;color:var(--green);letter-spacing:.12em;border:1px solid #37d69a44;background:#37d69a12;border-radius:20px;padding:6px 8px}
+.ticket{position:relative;border:1px solid #438be966;border-radius:15px;background:linear-gradient(145deg,rgba(20,48,81,.94),rgba(7,17,31,.96));padding:18px;overflow:hidden}
+.ticket:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#287cff,#55c7ff,transparent)}
+.ticket-label{font-size:8px;color:#91a9c7;letter-spacing:.17em;font-weight:800}
+.ticket-id{font-size:27px;font-weight:850;letter-spacing:.03em;margin:7px 0 3px}
+.ticket-sub{font-size:9px;color:#91a9c7}
+.route{display:flex;align-items:center;justify-content:space-between;margin:22px 0 17px}
+.route strong{font-size:23px}.route small{display:block;font-size:9px;color:#91a9c7;margin-top:3px}
+.route-line{flex:1;margin:0 13px;display:flex;align-items:center;gap:6px;color:#58bfff}
+.route-line:before,.route-line:after{content:"";height:1px;background:#438be988;flex:1}
+.ticket-divider{border-top:1px dashed #7893b555;margin:14px 0}
+.ticket-stats{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.ticket-stats span{display:block;font-size:8px;color:#8ca5c5;letter-spacing:.13em;margin-bottom:5px}.ticket-stats b{font-size:11px}
+.barcode{height:55px;margin:17px 0 8px;border-radius:5px;opacity:.9;background:repeating-linear-gradient(90deg,#dceeff 0 2px,transparent 2px 4px,#dceeff 4px 5px,transparent 5px 8px,#dceeff 8px 11px,transparent 11px 13px,#dceeff 13px 14px,transparent 14px 17px);background-color:#0b1a2c}
+.barcode-number{text-align:center;font-size:9px;letter-spacing:.22em;color:#a9c9e9}
+.preview-note{font-size:10px;color:#8fa4bf;line-height:1.6;margin:15px 0 0}
+.checklist{display:grid;gap:11px;margin-top:21px}
+.check{display:flex;align-items:center;gap:9px;font-size:10px;color:#b7c8dc}
+.check i{width:17px;height:17px;border-radius:50%;display:grid;place-items:center;background:#37d69a18;border:1px solid #37d69a55;color:#54e0ae;font-size:10px;font-style:normal}
+.notice{margin-top:15px;padding:11px 12px;border:1px solid #287cff38;border-radius:10px;background:#287cff10;color:#a9c8e8;font-size:9px;line-height:1.55}
+footer{border-top:1px solid #ffffff12;padding:17px 0 25px;color:#62748d;font-size:9px;letter-spacing:.12em;display:flex;justify-content:space-between;gap:12px}
+.toast{position:fixed;right:24px;bottom:24px;z-index:10;padding:13px 17px;border-radius:11px;background:#102c28;border:1px solid #35c99566;color:#a6f1d5;font-size:11px;box-shadow:var(--shadow);opacity:0;transform:translateY(12px);transition:.25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+@media(max-width:980px){.content-grid{grid-template-columns:1fr}.preview-panel{max-width:none}.bagbar{grid-template-columns:repeat(3,1fr)}.bag-id{grid-column:span 3}.metric:nth-child(2){border-left:0;padding-left:0}}
+@media(max-width:620px){.shell{width:calc(100% - 28px)}nav{height:65px}.hero{display:block;padding:35px 0 22px}.system-card{margin-top:18px;width:max-content}.bagbar{grid-template-columns:repeat(2,1fr);padding:15px}.bag-id{grid-column:span 2}.metric{padding-left:10px}.metric:nth-child(2),.metric:nth-child(4){border-left:0;padding-left:0}.form-panel,.preview-panel{padding:17px}.fields{grid-template-columns:1fr}.field.full{grid-column:auto}footer{flex-direction:column}.hero h1{font-size:39px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav>
+ <div class="brand"><div class="brand-mark">✈</div> SKYFLOW</div>
+ <div class="live"><i></i> LIVE SYSTEM</div>
+</nav>
+
+<header class="hero">
+ <div>
+  <div class="eyebrow">MODULE 01 / BAGGAGE REGISTRATION</div>
+  <h1>Every journey<br>starts with <span class="gradient">a check-in.</span></h1>
+  <p>Register passenger and baggage information, associate the bag with its flight, and generate a traceable baggage identity before it enters the airport handling network.</p>
+ </div>
+ <div class="system-card"><small>REGISTRATION DESK</small><strong id="systemState">READY TO REGISTER</strong><span>● SIMULATION ONLINE</span></div>
+</header>
+
+<section class="panel bagbar" aria-label="Current baggage record">
+ <div class="bag-id"><div class="bag-icon">🧳</div><div><div class="label">BAG IDENTIFICATION</div><strong>BG-20481</strong></div></div>
+ <div class="metric"><div class="label">FLIGHT</div><b>AI 203</b></div>
+ <div class="metric"><div class="label">ROUTE</div><b>ATQ <span style="color:#5cbcff">→</span> DEL</b></div>
+ <div class="metric"><div class="label">WEIGHT</div><b>18.4 KG</b></div>
+ <div class="metric"><div class="label">STATUS</div><b id="topStatus" style="color:var(--amber)">PENDING</b></div>
+</section>
+
+<div class="content-grid">
+ <main class="panel form-panel">
+  <div class="section-heading">
+   <div><h2>Baggage registration form</h2><p>Enter the required details to create the baggage record.</p></div>
+   <span class="step-tag">STEP 01 / 04</span>
+  </div>
+  <form id="registrationForm">
+   <section class="form-section">
+    <div class="form-section-title"><span class="number">01</span><h3>Passenger details</h3><small>TRAVELLER PROFILE</small></div>
+    <div class="fields">
+     <div class="field"><label for="passenger">PASSENGER FULL NAME *</label><input id="passenger" name="passenger" placeholder="Enter passenger name" required></div>
+     <div class="field"><label for="booking">BOOKING / PNR NUMBER *</label><input id="booking" name="booking" placeholder="e.g. A7K9P2" maxlength="10" required></div>
+     <div class="field"><label for="email">EMAIL ADDRESS</label><input id="email" name="email" type="email" placeholder="name@example.com"></div>
+     <div class="field"><label for="phone">CONTACT NUMBER *</label><input id="phone" name="phone" type="tel" placeholder="Enter mobile number" required></div>
+    </div>
+   </section>
+   <section class="form-section">
+    <div class="form-section-title"><span class="number">02</span><h3>Flight association</h3><small>FLIGHT DETAILS</small></div>
+    <div class="fields">
+     <div class="field"><label for="flight">FLIGHT NUMBER *</label><input id="flight" value="AI 203" required></div>
+     <div class="field"><label for="airline">AIRLINE</label><input id="airline" value="Air India"></div>
+     <div class="field"><label for="origin">DEPARTURE AIRPORT *</label><input id="origin" value="ATQ — Amritsar" required></div>
+     <div class="field"><label for="destination">ARRIVAL AIRPORT *</label><input id="destination" value="DEL — Delhi" required></div>
+     <div class="field"><label for="travelDate">DATE OF TRAVEL *</label><input id="travelDate" type="date" required></div>
+     <div class="field"><label for="terminal">TERMINAL / CHECK-IN DESK</label><input id="terminal" placeholder="Enter terminal or desk"></div>
+    </div>
+   </section>
+   <section class="form-section">
+    <div class="form-section-title"><span class="number">03</span><h3>Baggage details</h3><small>BAG SPECIFICATION</small></div>
+    <div class="fields">
+     <div class="field"><label for="bagType">BAGGAGE TYPE *</label><select id="bagType" required><option value="Checked Bag" selected>Checked Bag</option><option>Cabin Bag</option><option>Special Baggage</option></select></div>
+     <div class="field"><label for="weight">BAGGAGE WEIGHT (KG) *</label><input id="weight" type="number" min="0.1" max="100" step="0.1" value="18.4" required></div>
+     <div class="field"><label for="color">BAG COLOUR</label><input id="color" placeholder="e.g. Black"></div>
+     <div class="field"><label for="brand">BRAND / DESCRIPTION</label><input id="brand" placeholder="e.g. Hard-shell trolley"></div>
+    </div>
+   </section>
+   <section class="form-section">
+    <div class="form-section-title"><span class="number">04</span><h3>Bag ID & barcode</h3><small>SYSTEM IDENTIFICATION</small></div>
+    <div class="fields">
+     <div class="field"><label for="bagId">BAG ID *</label><input id="bagId" value="BG-20481" readonly></div>
+     <div class="field"><label for="barcodeId">BARCODE ID *</label><input id="barcodeId" value="BG20481AI203" readonly></div>
+     <div class="field full"><span class="hint">The bag ID and barcode are pre-assigned for this simulator record. Keep these identifiers attached to the same baggage throughout its handling journey.</span></div>
+    </div>
+   </section>
+   <div class="form-actions">
+    <button class="primary-btn" type="submit" id="registerBtn">REGISTER BAGGAGE →</button>
+    <button class="secondary-btn" type="reset">RESET FORM</button>
+   </div>
+  </form>
+ </main>
+
+ <aside class="panel preview-panel">
+  <div class="preview-top"><h2>Digital bag tag</h2><span class="live-pill">● SYSTEM GENERATED</span></div>
+  <div class="ticket">
+   <div class="ticket-label">SKYFLOW / BAGGAGE TAG</div>
+   <div class="ticket-id">BG-20481</div>
+   <div class="ticket-sub">UNIQUE BAGGAGE IDENTIFICATION</div>
+   <div class="route">
+    <div><strong>ATQ</strong><small>Amritsar</small></div>
+    <div class="route-line">✈</div>
+    <div style="text-align:right"><strong>DEL</strong><small>Delhi</small></div>
+   </div>
+   <div class="ticket-divider"></div>
+   <div class="ticket-stats">
+    <div><span>FLIGHT</span><b>AI 203</b></div>
+    <div><span>BAG TYPE</span><b id="previewType">CHECKED BAG</b></div>
+    <div><span>WEIGHT</span><b id="previewWeight">18.4 KG</b></div>
+    <div><span>RECORD STATUS</span><b id="previewStatus" style="color:var(--amber)">PENDING</b></div>
+   </div>
+   <div class="ticket-divider"></div>
+   <div class="barcode" aria-label="Decorative barcode representation"></div>
+   <div class="barcode-number">BG20481AI203</div>
+  </div>
+  <p class="preview-note">This digital tag links the passenger's checked baggage to the selected flight. The barcode ID is used as the bag's reference throughout the handling workflow.</p>
+  <div class="checklist">
+   <div class="check"><i>✓</i> Unique bag ID assigned</div>
+   <div class="check"><i>✓</i> Flight association pre-filled</div>
+   <div class="check"><i>✓</i> Barcode reference generated</div>
+   <div class="check"><i>✓</i> Ready for handling after registration</div>
+  </div>
+  <div class="notice">SIMULATION NOTE · Passenger and booking details are entered locally for this demonstration. No real airline system or database is contacted.</div>
+ </aside>
+</div>
+
+<footer><span>SKYFLOW · BAGGAGE OPERATIONS SIMULATOR</span><span>MODULE 01 · BAGGAGE REGISTRATION</span></footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const form=document.getElementById('registrationForm');
+const toast=document.getElementById('toast');
+function showToast(message){toast.textContent=message;toast.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>toast.classList.remove('show'),2800)}
+document.getElementById('weight').addEventListener('input',e=>{document.getElementById('previewWeight').textContent=(e.target.value||'—')+' KG'});
+document.getElementById('bagType').addEventListener('change',e=>{document.getElementById('previewType').textContent=e.target.value.toUpperCase()});
+form.addEventListener('submit',e=>{
+ e.preventDefault();
+ if(!form.reportValidity())return;
+ const name=document.getElementById('passenger').value.trim();
+ document.getElementById('systemState').textContent='REGISTRATION COMPLETE';
+ document.getElementById('topStatus').textContent='REGISTERED';
+ document.getElementById('topStatus').style.color='var(--green)';
+ document.getElementById('previewStatus').textContent='REGISTERED';
+ document.getElementById('previewStatus').style.color='var(--green)';
+ document.getElementById('registerBtn').textContent='BAGGAGE REGISTERED ✓';
+ showToast('Bag BG-20481 registered successfully for '+name+'.');
+});
+form.addEventListener('reset',()=>setTimeout(()=>{
+ document.getElementById('systemState').textContent='READY TO REGISTER';
+ document.getElementById('topStatus').textContent='PENDING';
+ document.getElementById('topStatus').style.color='var(--amber)';
+ document.getElementById('previewStatus').textContent='PENDING';
+ document.getElementById('previewStatus').style.color='var(--amber)';
+ document.getElementById('previewType').textContent='CHECKED BAG';
+ document.getElementById('previewWeight').textContent='18.4 KG';
+ document.getElementById('registerBtn').textContent='REGISTER BAGGAGE →';
+},0));
+</script>
+</body>
+</html>
