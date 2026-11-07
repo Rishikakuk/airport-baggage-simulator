@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#070b12">
+    <title>SKYFLOW | Exception Management</title>
+    <style>
+        :root {
+            --bg: #070b12;
+            --panel: rgba(13, 24, 43, .82);
+            --panel2: rgba(15, 31, 56, .72);
+            --line: rgba(91, 151, 230, .2);
+            --blue: #287cff;
+            --cyan: #55c7ff;
+            --muted: #91a2ba;
+            --text: #f4f8ff;
+            --green: #37d69a;
+            --amber: #ffb454;
+            --red: #ff657a;
+            --violet: #a58bff;
+            --shadow: 0 18px 55px rgba(0, 0, 0, .28)
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+            background: radial-gradient(ellipse at 75% 17%, rgba(20, 91, 190, .22), transparent 34%), radial-gradient(ellipse at 12% 48%, rgba(16, 71, 148, .15), transparent 36%), var(--bg);
+            letter-spacing: .01em
+        }
+
+        body:before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .13;
+            background-image: linear-gradient(rgba(90, 140, 210, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(90, 140, 210, .07) 1px, transparent 1px);
+            background-size: 54px 54px;
+            mask-image: linear-gradient(to bottom, black, transparent 80%)
+        }
+
+        button,
+        input,
+        select {
+            font: inherit
+        }
+
+        button {
+            cursor: pointer
+        }
+
+        .shell {
+            width: min(1380px, calc(100% - 48px));
+            margin: auto;
+            position: relative
+        }
+
+        nav {
+            height: 78px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(119, 160, 215, .12)
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            letter-spacing: .13em;
+            font-size: 14px
+        }
+
+        .brand-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 11px;
+            background: linear-gradient(145deg, #328bff, #0750d8);
+            display: grid;
+            place-items: center;
+            box-shadow: 0 6px 22px #1266dc66
+        }
+
+        .brand-mark svg {
+            width: 19px
+        }
+
+        .live {
+            font-size: 10px;
+            letter-spacing: .18em;
+            color: #a5b5ca;
+            display: flex;
+            align-items: center;
+            gap: 9px
+        }
+
+        .live i {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 12px var(--green)
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 28px;
+            padding: 54px 0 28px
+        }
+
+        .eyebrow {
+            font-size: 10px;
+            letter-spacing: .22em;
+            color: #65aaff;
+            font-weight: 800;
+            margin-bottom: 15px
+        }
+
+        .hero h1 {
+            font-size: clamp(34px, 5vw, 58px);
+            line-height: 1.02;
+            letter-spacing: -.045em;
+            margin: 0;
+            max-width: 730px
+        }
+
+        .gradient {
+            background: linear-gradient(90deg, #55c9ff, #3481ff 70%);
+            color: transparent;
+            background-clip: text
+        }
+
+        .hero p {
+            color: #a3b2c7;
+            line-height: 1.65;
+            max-width: 650px;
+            font-size: 13px;
+            margin: 16px 0 0
+        }
+
+        .system-card {
+            min-width: 205px;
+            padding: 17px 19px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(20, 53, 91, .76), rgba(10, 20, 36, .8));
+            box-shadow: var(--shadow)
+        }
+
+        .system-card small,
+        .label {
+            font-size: 9px;
+            letter-spacing: .16em;
+            color: #8fa7c6;
+            font-weight: 800
+        }
+
+        .system-card strong {
+            display: block;
+            margin-top: 9px;
+            font-size: 19px
+        }
+
+        .system-card span {
+            font-size: 10px;
+            color: var(--green)
+        }
+
+        .panel {
+            border: 1px solid var(--line);
+            background: linear-gradient(135deg, rgba(17, 35, 61, .88), rgba(9, 17, 31, .88));
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(14px)
+        }
+
+        .bagbar {
+            display: grid;
+            grid-template-columns: 1.5fr repeat(5, 1fr);
+            align-items: center;
+            padding: 18px 22px;
+            gap: 16px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .bagbar:after {
+            content: "";
+            position: absolute;
+            width: 320px;
+            height: 140px;
+            right: 20%;
+            top: -95px;
+            background: #1c74ff33;
+            filter: blur(45px);
+            pointer-events: none
+        }
+
+        .bag-id {
+            display: flex;
+            align-items: center;
+            gap: 13px
+        }
+
+        .bag-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 13px;
+            background: #1455a644;
+            border: 1px solid #3e8dff44;
+            color: #72caff;
+            font-size: 21px
+        }
+
+        .bag-id strong {
+            font-size: 20px;
+            display: block;
+            margin-top: 5px;
+            letter-spacing: .02em
+        }
+
+        .metric {
+            border-left: 1px solid rgba(127, 166, 217, .13);
+            padding-left: 16px;
+            min-width: 0
+        }
+
+        .metric b {
+            display: block;
+            font-size: 12px;
+            margin-top: 7px;
+            white-space: nowrap
+        }
+
+        .metric .warn {
+            color: var(--amber)
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            margin: 38px 0 17px;
+            gap: 16px
+        }
+
+        .section-head h2 {
+            font-size: 19px;
+            margin: 0;
+            letter-spacing: -.02em
+        }
+
+        .section-head p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 11px
+        }
+
+        .count-pill {
+            border: 1px solid var(--line);
+            border-radius: 30px;
+            padding: 8px 12px;
+            color: #a9bdd8;
+            font-size: 10px;
+            letter-spacing: .1em
+        }
+
+        .exception-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 13px
+        }
+
+        .exception-card {
+            position: relative;
+            text-align: left;
+            color: inherit;
+            padding: 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(108, 151, 211, .16);
+            background: linear-gradient(150deg, rgba(18, 34, 57, .9), rgba(10, 18, 31, .92));
+            min-height: 220px;
+            transition: .22s ease;
+            overflow: hidden
+        }
+
+        .exception-card:hover {
+            transform: translateY(-3px);
+            border-color: #438fff77;
+            box-shadow: 0 14px 35px #0005
+        }
+
+        .exception-card.selected {
+            border-color: #419bffb8;
+            background: linear-gradient(145deg, rgba(20, 57, 99, .9), rgba(10, 24, 43, .96));
+            box-shadow: 0 0 0 1px #348bff22, 0 12px 38px #075bd522
+        }
+
+        .exception-card.selected:after {
+            content: "";
+            position: absolute;
+            inset: auto 18px 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #42b8ff, transparent)
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .ex-icon {
+            width: 39px;
+            height: 39px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 18px;
+            background: #ffb45416;
+            color: var(--amber);
+            border: 1px solid #ffb45433
+        }
+
+        .ex-icon.red {
+            background: #ff657a16;
+            color: var(--red);
+            border-color: #ff657a33
+        }
+
+        .ex-icon.blue {
+            background: #55a5ff16;
+            color: #76baff;
+            border-color: #55a5ff33
+        }
+
+        .ex-icon.yellow {
+            background: #f6d36516;
+            color: #f6d365;
+            border-color: #f6d36533
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--amber);
+            box-shadow: 0 0 10px currentColor
+        }
+
+        .exception-card h3 {
+            font-size: 14px;
+            margin: 16px 0 8px
+        }
+
+        .exception-card p {
+            font-size: 10.5px;
+            line-height: 1.55;
+            color: #9eafc5;
+            margin: 0;
+            min-height: 49px
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #ffffff10;
+            margin-top: 15px;
+            padding-top: 12px;
+            font-size: 9px;
+            color: #a8bad1
+        }
+
+        .severity {
+            font-size: 8px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            padding: 5px 7px;
+            border-radius: 5px;
+            background: #ffb45416;
+            color: var(--amber)
+        }
+
+        .severity.high {
+            background: #ff657a16;
+            color: var(--red)
+        }
+
+        .severity.medium {
+            background: #ffb45416;
+            color: var(--amber)
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(300px, .85fr);
+            gap: 15px;
+            margin-top: 16px
+        }
+
+        .detail-panel,
+        .action-panel {
+            padding: 22px
+        }
+
+        .panel-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px
+        }
+
+        .panel-title h2 {
+            font-size: 16px;
+            margin: 0
+        }
+
+        .tag {
+            font-size: 9px;
+            letter-spacing: .12em;
+            padding: 7px 9px;
+            border-radius: 7px;
+            background: #ffb45418;
+            color: var(--amber);
+            border: 1px solid #ffb45435
+        }
+
+        .detail-intro {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            margin: 22px 0 18px
+        }
+
+        .detail-intro .ex-icon {
+            width: 47px;
+            height: 47px;
+            font-size: 21px
+        }
+
+        .detail-intro h3 {
+            font-size: 18px;
+            margin: 0 0 5px
+        }
+
+        .detail-intro p {
+            font-size: 10px;
+            color: var(--muted);
+            margin: 0
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px
+        }
+
+        .detail-cell {
+            padding: 12px;
+            border: 1px solid #ffffff0e;
+            background: #07111f77;
+            border-radius: 10px;
+            min-width: 0
+        }
+
+        .detail-cell span {
+            display: block;
+            font-size: 8px;
+            letter-spacing: .14em;
+            color: #8198b7;
+            margin-bottom: 7px
+        }
+
+        .detail-cell b {
+            font-size: 11px;
+            overflow-wrap: anywhere
+        }
+
+        .detail-copy {
+            margin-top: 13px;
+            padding: 14px;
+            border-radius: 11px;
+            background: #07111f77;
+            border: 1px solid #ffffff0e
+        }
+
+        .detail-copy span {
+            font-size: 8px;
+            letter-spacing: .14em;
+            color: #8198b7
+        }
+
+        .detail-copy p {
+            font-size: 11px;
+            color: #c0cde0;
+            line-height: 1.6;
+            margin: 7px 0 0
+        }
+
+        .action-panel {
+            display: flex;
+            flex-direction: column
+        }
+
+        .action-list {
+            display: grid;
+            gap: 14px;
+            margin: 21px 0
+        }
+
+        .action-row {
+            display: flex;
+            gap: 11px;
+            align-items: flex-start
+        }
+
+        .action-row .bullet {
+            width: 7px;
+            height: 7px;
+            flex: none;
+            border-radius: 50%;
+            margin-top: 4px;
+            background: #4b9fff;
+            box-shadow: 0 0 9px #4b9fff77
+        }
+
+        .action-row span {
+            font-size: 8px;
+            color: #8198b7;
+            letter-spacing: .13em;
+            display: block;
+            margin-bottom: 5px
+        }
+
+        .action-row b {
+            font-size: 11px;
+            line-height: 1.5
+        }
+
+        .progress-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #a9bad1;
+            margin-bottom: 8px
+        }
+
+        .progress-head strong {
+            color: #eaf4ff
+        }
+
+        .progress-track {
+            height: 6px;
+            border-radius: 8px;
+            background: #ffffff12;
+            overflow: hidden
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 33%;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #2678ff, #5dd3ff);
+            transition: width .35s
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            border: 0;
+            border-radius: 10px;
+            padding: 13px 16px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .12em;
+            transition: .2s
+        }
+
+        .primary-btn {
+            color: white;
+            background: linear-gradient(100deg, #1765df, #268cff);
+            box-shadow: 0 8px 20px #1265df40;
+            margin-top: 18px
+        }
+
+        .primary-btn:hover {
+            filter: brightness(1.14);
+            transform: translateY(-1px)
+        }
+
+        .primary-btn:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            transform: none
+        }
+
+        .secondary-btn {
+            background: #ffffff0d;
+            color: #b8c9df;
+            border: 1px solid var(--line);
+            margin-top: 9px
+        }
+
+        .secondary-btn:hover {
+            background: #ffffff16
+        }
+
+        .timeline-panel {
+            padding: 22px;
+            margin-top: 16px
+        }
+
+        .timeline {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0;
+            margin-top: 25px
+        }
+
+        .step {
+            position: relative;
+            padding: 0 12px 0 0
+        }
+
+        .step:not(:last-child):after {
+            content: "";
+            position: absolute;
+            height: 2px;
+            top: 12px;
+            left: 28px;
+            right: 0;
+            background: #ffffff18
+        }
+
+        .step.done:not(:last-child):after {
+            background: linear-gradient(90deg, var(--green), #2d997e)
+        }
+
+        .step.active:not(:last-child):after {
+            background: linear-gradient(90deg, #2999ff, #ffffff18)
+        }
+
+        .step-circle {
+            position: relative;
+            z-index: 1;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: #1a2638;
+            border: 1px solid #52647d;
+            color: #91a2ba;
+            font-size: 10px
+        }
+
+        .step.done .step-circle {
+            background: #123d35;
+            border-color: #31c994;
+            color: #54e0ae
+        }
+
+        .step.active .step-circle {
+            background: #123a68;
+            border: 1px solid #46b8ff;
+            color: #8bdcff;
+            box-shadow: 0 0 17px #258cff66;
+            animation: pulse 2s infinite
+        }
+
+        .step b {
+            display: block;
+            font-size: 9px;
+            margin: 12px 0 5px
+        }
+
+        .step small {
+            display: block;
+            color: #8294ad;
+            font-size: 9px;
+            line-height: 1.45;
+            padding-right: 7px
+        }
+
+        .step-state {
+            font-size: 7px !important;
+            letter-spacing: .13em;
+            color: #8294ad !important;
+            margin-top: 8px
+        }
+
+        .step.done .step-state {
+            color: var(--green) !important
+        }
+
+        .step.active .step-state {
+            color: #66c7ff !important
+        }
+
+        @keyframes pulse {
+            50% {
+                box-shadow: 0 0 5px #258cff44
+            }
+        }
+
+        .tools-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin: 35px 0 14px
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            max-width: 420px
+        }
+
+        .search-wrap input {
+            width: 100%;
+            background: #0c1728;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 12px 14px 12px 38px;
+            color: white;
+            outline: none;
+            font-size: 11px
+        }
+
+        .search-wrap input:focus {
+            border-color: #368dff
+        }
+
+        .search-wrap span {
+            position: absolute;
+            left: 13px;
+            top: 10px;
+            color: #7992b3
+        }
+
+        .filter-select {
+            background: #0c1728;
+            border: 1px solid var(--line);
+            color: #b9c9df;
+            border-radius: 10px;
+            padding: 11px 13px;
+            font-size: 10px;
+            outline: none
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 45px
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 13px 16px;
+            border-radius: 11px;
+            border: 1px solid #ffffff10;
+            background: #0b1524a8
+        }
+
+        .result-left {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .mini-icon {
+            width: 31px;
+            height: 31px;
+            display: grid;
+            place-items: center;
+            border-radius: 9px;
+            background: #1b3659;
+            color: #82c9ff
+        }
+
+        .result-row strong {
+            font-size: 11px;
+            display: block
+        }
+
+        .result-row small {
+            font-size: 9px;
+            color: #8fa2bd
+        }
+
+        .result-right {
+            display: flex;
+            align-items: center;
+            gap: 13px
+        }
+
+        .result-status {
+            font-size: 9px;
+            color: var(--amber)
+        }
+
+        .open-btn {
+            border: 1px solid var(--line);
+            background: #ffffff08;
+            color: #bcd2ef;
+            border-radius: 7px;
+            padding: 7px 10px;
+            font-size: 9px
+        }
+
+        .empty {
+            padding: 28px;
+            text-align: center;
+            border: 1px dashed #42618466;
+            border-radius: 12px;
+            color: #a9bad1;
+            font-size: 12px
+        }
+
+        .empty small {
+            display: block;
+            color: #8093ad;
+            margin-top: 7px
+        }
+
+        footer {
+            border-top: 1px solid #ffffff12;
+            padding: 17px 0 25px;
+            color: #62748d;
+            font-size: 9px;
+            letter-spacing: .12em;
+            display: flex;
+            justify-content: space-between
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: #02060dcc;
+            backdrop-filter: blur(8px);
+            display: none;
+            place-items: center;
+            padding: 20px;
+            z-index: 20
+        }
+
+        .modal-backdrop.show {
+            display: grid
+        }
+
+        .modal {
+            width: min(420px, 100%);
+            padding: 25px;
+            border: 1px solid #438be966;
+            border-radius: 17px;
+            background: linear-gradient(145deg, #142944, #091321);
+            box-shadow: 0 25px 90px #000b
+        }
+
+        .modal h3 {
+            font-size: 18px;
+            margin: 0 0 9px
+        }
+
+        .modal p {
+            font-size: 11px;
+            color: #a8b9cf;
+            line-height: 1.6
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 9px;
+            margin-top: 20px
+        }
+
+        .modal-actions button {
+            flex: 1
+        }
+
+        .toast {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 30;
+            padding: 13px 17px;
+            border-radius: 11px;
+            background: #102c28;
+            border: 1px solid #35c99566;
+            color: #a6f1d5;
+            font-size: 11px;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transform: translateY(12px);
+            transition: .25s;
+            pointer-events: none
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        @media(max-width:1000px) {
+            .bagbar {
+                grid-template-columns: repeat(3, 1fr)
+            }
+
+            .bag-id {
+                grid-column: span 3
+            }
+
+            .metric:nth-child(2) {
+                border-left: 0;
+                padding-left: 0
+            }
+
+            .exception-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .workspace {
+                grid-template-columns: 1fr
+            }
+
+            .timeline {
+                grid-template-columns: repeat(3, 1fr);
+                row-gap: 25px
+            }
+
+            .step:nth-child(3):after {
+                display: none
+            }
+        }
+
+        @media(max-width:620px) {
+            .shell {
+                width: min(100% - 28px, 1380px)
+            }
+
+            nav {
+                height: 65px
+            }
+
+            .hero {
+                padding: 38px 0 22px;
+                display: block
+            }
+
+            .system-card {
+                margin-top: 20px;
+                width: max-content
+            }
+
+            .bagbar {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 15px
+            }
+
+            .bag-id {
+                grid-column: span 2
+            }
+
+            .metric {
+                padding-left: 10px
+            }
+
+            .metric:nth-child(2),
+            .metric:nth-child(4) {
+                border-left: 0;
+                padding-left: 0
+            }
+
+            .section-head {
+                margin-top: 29px
+            }
+
+            .exception-grid {
+                grid-template-columns: 1fr
+            }
+
+            .exception-card {
+                min-height: 0
+            }
+
+            .exception-card p {
+                min-height: 0
+            }
+
+            .detail-panel,
+            .action-panel,
+            .timeline-panel {
+                padding: 17px
+            }
+
+            .detail-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .timeline {
+                grid-template-columns: repeat(2, 1fr);
+                row-gap: 23px
+            }
+
+            .step:nth-child(3):after {
+                display: block
+            }
+
+            .step:nth-child(even):after {
+                display: none
+            }
+
+            .tools-row {
+                align-items: stretch;
+                flex-direction: column
+            }
+
+            .search-wrap {
+                max-width: none
+            }
+
+            .result-row {
+                align-items: flex-start
+            }
+
+            .result-right {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 7px
+            }
+
+            footer {
+                gap: 12px;
+                flex-direction: column
+            }
+
+            .hero h1 {
+                font-size: 39px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <nav>
+            <div class="brand">
+                <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8">
+                        <path d="M3 13.5 21 4l-7.5 17-2.1-7.4L3 13.5Z" />
+                        <path d="m11.4 13.6 4.2-4.2" />
+                    </svg></div> SKYFLOW
+            </div>
+            <div class="live"><i></i> LIVE SYSTEM</div>
+        </nav>
+        <header class="hero">
+            <div>
+                <div class="eyebrow">MODULE 04 / EXCEPTION MANAGEMENT</div>
+                <h1>When things go <span class="gradient">off track.</span></h1>
+                <p>Monitor baggage disruptions, investigate handling exceptions and coordinate resolutions across
+                    airport operations. Keep every bag moving towards its destination.</p>
+            </div>
+            <div class="system-card"><small>EXCEPTION CONTROL CENTRE</small><strong id="systemState">4 ACTIVE
+                    EVENTS</strong><span>● SIMULATION ONLINE</span></div>
+        </header>
+        <section class="panel bagbar" aria-label="Baggage information">
+            <div class="bag-id">
+                <div class="bag-icon">▣</div>
+                <div>
+                    <div class="label">BAG IDENTIFICATION</div><strong>BG-20481</strong>
+                </div>
+            </div>
+            <div class="metric">
+                <div class="label">FLIGHT</div><b>AI 203</b>
+            </div>
+            <div class="metric">
+                <div class="label">ROUTE</div><b>ATQ <span style="color:#5cbcff">→</span> DEL</b>
+            </div>
+            <div class="metric">
+                <div class="label">TYPE</div><b>CHECKED BAG</b>
+            </div>
+            <div class="metric">
+                <div class="label">WEIGHT</div><b>18.4 KG</b>
+            </div>
+            <div class="metric">
+                <div class="label">CONDITION</div><b class="warn" id="bagCondition">EXCEPTION DETECTED</b>
+            </div>
+        </section>
+        <div class="section-head">
+            <div>
+                <h2>Exception control centre</h2>
+                <p>Select an event to inspect its details and manage its resolution.</p>
+            </div>
+            <div class="count-pill" id="exceptionCount">04 EXCEPTION TYPES</div>
+        </div>
+        <section class="exception-grid" id="exceptionGrid"></section>
+        <section class="workspace">
+            <div class="panel detail-panel">
+                <div class="panel-title">
+                    <h2>Investigation details</h2><span class="tag" id="detailStatus">INVESTIGATION REQUIRED</span>
+                </div>
+                <div class="detail-intro">
+                    <div class="ex-icon" id="detailIcon">◷</div>
+                    <div>
+                        <h3 id="detailName">Delayed Baggage</h3>
+                        <p id="detailSubtitle">EX-001 · DETECTED 10:42 AM</p>
+                    </div>
+                </div>
+                <div class="detail-grid" id="detailGrid"></div>
+                <div class="detail-copy"><span>REASON FOR EXCEPTION</span>
+                    <p id="detailReason"></p>
+                </div>
+                <div class="detail-copy"><span>RECOMMENDED RESOLUTION</span>
+                    <p id="detailRecommendation"></p>
+                </div>
+            </div>
+            <aside class="panel action-panel">
+                <div class="panel-title">
+                    <h2>Resolution control</h2><span class="label">LIVE ACTION</span>
+                </div>
+                <div class="action-list">
+                    <div class="action-row"><i class="bullet"></i>
+                        <div><span>ASSIGNED DEPARTMENT</span><b id="assignedDept"></b></div>
+                    </div>
+                    <div class="action-row"><i class="bullet"></i>
+                        <div><span>ACTION REQUIRED</span><b id="actionRequired"></b></div>
+                    </div>
+                    <div class="action-row"><i class="bullet"></i>
+                        <div><span>NEXT EXPECTED STEP</span><b id="nextStep"></b></div>
+                    </div>
+                </div>
+                <div style="margin-top:auto">
+                    <div class="progress-head"><span>RESOLUTION PROGRESS</span><strong id="progressText">33%</strong>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <button class="primary-btn" id="resolveBtn" style="width:100%">RESOLVE EXCEPTION</button><button
+                        class="secondary-btn" id="reopenBtn" style="width:100%;display:none">REOPEN EXCEPTION</button>
+                </div>
+            </aside>
+        </section>
+        <section class="panel timeline-panel">
+            <div class="panel-title">
+                <div>
+                    <h2>Exception resolution timeline</h2>
+                    <p style="color:var(--muted);font-size:10px;margin:6px 0 0">Track the baggage journey from
+                        registration through operational clearance.</p>
+                </div><span class="label" id="timelineLabel">EX-001 WORKFLOW</span>
+            </div>
+            <div class="timeline" id="timeline"></div>
+        </section>
+        <div class="tools-row">
+            <div>
+                <div class="label" style="margin-bottom:8px">BAGGAGE EXCEPTION RECORDS</div>
+                <div style="font-size:16px;font-weight:700">Search &amp; filter events</div>
+            </div>
+            <div class="search-wrap"><span>⌕</span><input id="searchInput" type="search"
+                    placeholder="Search by Bag ID..."></div><select class="filter-select" id="filterSelect"
+                aria-label="Filter exceptions">
+                <option value="all">All Exceptions</option>
+                <option value="delayed">Delayed</option>
+                <option value="security">Security Hold</option>
+                <option value="routing">Wrong Routing</option>
+                <option value="overweight">Overweight</option>
+                <option value="resolved">Resolved</option>
+            </select>
+        </div>
+        <div class="results" id="results"></div>
+        <footer><span>SKYFLOW · BAGGAGE OPERATIONS SIMULATOR</span><span>MODULE 04 · EXCEPTION MANAGEMENT</span>
+        </footer>
+    </div>
+    <div class="modal-backdrop" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal">
+            <div class="eyebrow">CONFIRM OPERATION</div>
+            <h3 id="modalTitle">Resolve this exception?</h3>
+            <p id="modalText">Confirm that the required corrective action has been completed. This will mark the
+                exception as resolved in this simulation.</p>
+            <div class="modal-actions"><button class="secondary-btn" id="cancelModal">CANCEL</button><button
+                    class="primary-btn" id="confirmResolve">CONFIRM RESOLUTION</button></div>
+        </div>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <script>
+        const exceptionData = [
+            {id: "delayed", code: "EX-001", name: "Delayed Baggage", icon: "◷", tone: "amber", severity: "Medium", status: "Investigation Required", time: "10:42 AM", location: "Baggage Sorting Area", department: "Ground Handling Operations", description: "The baggage has failed to reach its expected handling checkpoint within the scheduled processing window. Its current location must be verified before the handling process can continue.", reason: "Expected baggage checkpoint was not reached within the scheduled processing window.", recommendation: "Verify the baggage location and coordinate with the sorting department.", action: "Initiate a baggage location verification and contact the responsible handling department.", next: "Confirm the last recorded scan and locate the bag in the sorting area.", progress: 33},
+            {id: "security", code: "EX-002", name: "Security Hold", icon: "⬡", tone: "red", severity: "High", status: "Under Review", time: "10:48 AM", location: "Security Screening Zone B", department: "Airport Security Screening", description: "The baggage has been temporarily placed on hold for additional security screening. Further inspection is required before it can be cleared for onward processing.", reason: "Additional security screening has been requested before the baggage can be cleared for onward processing.", recommendation: "Refer the baggage to the security screening team and await clearance.", action: "Refer the baggage to the security screening team and await clearance.", next: "Complete the additional screening and record the security clearance decision.", progress: 50},
+            {id: "routing", code: "EX-003", name: "Wrong Routing", icon: "⌖", tone: "blue", severity: "High", status: "Rerouting Required", time: "10:51 AM", location: "Outbound Sorting Conveyor 3", department: "Baggage Routing Operations", description: "The baggage has been directed towards an incorrect sorting destination. The routing information needs to be verified and the baggage must be redirected to its intended destination.", reason: "The assigned sorting destination does not match the intended flight destination DEL.", recommendation: "Verify the assigned flight destination and initiate the correct routing process.", action: "Verify the assigned flight destination and initiate the correct routing process.", next: "Correct the routing assignment and confirm transfer to the AI 203 outbound path.", progress: 25},
+            {id: "overweight", code: "EX-004", name: "Overweight Baggage", icon: "⚖", tone: "yellow", severity: "Medium", status: "Weight Alert", time: "10:55 AM", location: "Check-in Weighing Station 04", department: "Airline Baggage Services", description: "The recorded baggage weight exceeds the permitted airline allowance. The issue requires verification and appropriate handling before the baggage can proceed.", reason: "The recorded weight requires comparison against the applicable airline baggage allowance.", recommendation: "Request baggage weight verification and coordinate with the airline handling department.", action: "Request baggage weight verification and coordinate with the airline handling department.", next: "Recheck the recorded weight and confirm the airline's baggage allowance.", progress: 33}
+        ];
+        const steps = [
+            ["BAGGAGE REGISTERED", "The baggage has been successfully registered in the system."],
+            ["EXCEPTION DETECTED", "An unexpected baggage handling condition has been identified."],
+            ["HANDLING TEAM NOTIFIED", "The relevant airport operations department has been informed."],
+            ["INVESTIGATION IN PROGRESS", "The responsible department is examining the issue."],
+            ["RESOLUTION", "The required corrective action is being performed."],
+            ["PROCESSING RESUMED", "The baggage has been cleared to continue its journey."]
+        ];
+        const STORAGE_KEY = "skyflow_exception_module_v1";
+        let selectedId = "delayed", resolved = {};
+        try {resolved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}")} catch (e) {resolved = {}}
+        const $ = id => document.getElementById(id);
+        const selected = () => exceptionData.find(x => x.id === selectedId);
+        const isResolved = x => !!resolved[x.id];
+        function save() {try {localStorage.setItem(STORAGE_KEY, JSON.stringify(resolved))} catch (e) { } }
+        function statusOf(x) {return isResolved(x) ? "Resolved" : x.status}
+        function progressOf(x) {return isResolved(x) ? 100 : x.progress}
+        function renderCards() {
+            $("exceptionGrid").innerHTML = exceptionData.map(x => `<button class="exception-card ${selectedId === x.id ? "selected" : ""}" data-id="${x.id}" aria-pressed="${selectedId === x.id}">
+ <div class="card-top"><div class="ex-icon ${x.tone}">${x.icon}</div><span class="status-dot" style="background:${isResolved(x) ? "var(--green)" : x.severity === "High" ? "var(--red)" : "var(--amber)"}"></span></div>
+ <h3>${x.name}</h3><p>${x.description}</p><div class="card-meta"><span>${x.code} · ${statusOf(x).toUpperCase()}</span><span class="severity ${x.severity.toLowerCase()}">${x.severity}</span></div></button>`).join("");
+            document.querySelectorAll(".exception-card").forEach(b => b.addEventListener("click", () => selectException(b.dataset.id)));
+        }
+        function renderDetails() {
+            const x = selected(), done = isResolved(x);
+            $("detailStatus").textContent = statusOf(x).toUpperCase(); $("detailStatus").style.color = done ? "var(--green)" : x.severity === "High" ? "var(--red)" : "var(--amber)";
+            $("detailStatus").style.background = done ? "#37d69a18" : ""; $("detailStatus").style.borderColor = done ? "#37d69a44" : "";
+            $("detailIcon").className = "ex-icon " + x.tone; $("detailIcon").textContent = x.icon;
+            $("detailName").textContent = x.name; $("detailSubtitle").textContent = x.code + " · DETECTED " + x.time;
+            const cells = [["BAG ID", "BG-20481"], ["FLIGHT", "AI 203"], ["SEVERITY", x.severity.toUpperCase()], ["CURRENT LOCATION", x.location], ["DETECTION TIME", x.time], ["CURRENT STATUS", statusOf(x).toUpperCase()]];
+            $("detailGrid").innerHTML = cells.map(c => `<div class="detail-cell"><span>${c[0]}</span><b>${c[1]}</b></div>`).join("");
+            $("detailReason").textContent = x.reason; $("detailRecommendation").textContent = x.recommendation;
+            $("assignedDept").textContent = x.department; $("actionRequired").textContent = done ? "Corrective action recorded. Exception is closed." : x.action;
+            $("nextStep").textContent = done ? "No further action. Processing may resume." : x.next;
+            $("progressText").textContent = progressOf(x) + "%"; $("progressFill").style.width = progressOf(x) + "%";
+            $("resolveBtn").style.display = done ? "none" : "block"; $("reopenBtn").style.display = done ? "block" : "none";
+            $("bagCondition").textContent = done ? "EXCEPTION RESOLVED" : "EXCEPTION DETECTED"; $("bagCondition").style.color = done ? "var(--green)" : "var(--amber)";
+            $("timelineLabel").textContent = x.code + " WORKFLOW";
+            $("systemState").textContent = exceptionData.filter(e => !isResolved(e)).length + " ACTIVE EVENTS";
+        }
+        function renderTimeline() {
+            const x = selected(), done = isResolved(x);
+            const active = done ? 5 : (x.id === "security" ? 3 : x.id === "routing" ? 2 : 3);
+            $("timeline").innerHTML = steps.map((s, i) => {let state = done || i < active ? "done" : i === active ? "active" : "pending"; return `<div class="step ${state}"><div class="step-circle">${state === "done" ? "✓" : String(i + 1).padStart(2, "0")}</div><b>${s[0]}</b><small>${s[1]}</small><small class="step-state">${state === "done" ? "COMPLETED" : state === "active" ? "IN PROGRESS" : "PENDING"}</small></div>`}).join("");
+        }
+        function selectException(id) {selectedId = id; renderAll(); document.querySelector(".detail-panel").scrollIntoView({behavior: "smooth", block: "nearest"})}
+        function renderResults() {
+            const q = $("searchInput").value.trim().toUpperCase(), f = $("filterSelect").value;
+            let list = exceptionData.filter(x => {
+                const searchMatch = !q || "BG-20481".includes(q) || x.code.includes(q) || x.name.toUpperCase().includes(q);
+                const filterMatch = f === "all" || (f === "resolved" ? isResolved(x) : x.id === f);
+                return searchMatch && filterMatch;
+            });
+            if (q && q !== "BG-20481" && !exceptionData.some(x => x.code.includes(q) || x.name.toUpperCase().includes(q))) list = [];
+            if (!list.length) {$("results").innerHTML = `<div class="empty">No baggage record found. Please verify the Bag ID and try again.<small>Try BG-20481 to view the primary baggage record.</small></div>`; return }
+            $("results").innerHTML = list.map(x => `<div class="result-row"><div class="result-left"><div class="mini-icon">${x.icon}</div><div><strong>${x.name} <span style="color:#6e8aaa;font-weight:500">· ${x.code}</span></strong><small>BG-20481 &nbsp; / &nbsp; AI 203 &nbsp; / &nbsp; ATQ → DEL</small></div></div><div class="result-right"><span class="result-status" style="color:${isResolved(x) ? "var(--green)" : x.severity === "High" ? "var(--red)" : "var(--amber)"}">${statusOf(x)}</span><button class="open-btn" data-open="${x.id}">VIEW DETAILS</button></div></div>`).join("");
+            document.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => selectException(b.dataset.open)));
+        }
+        function renderAll() {renderCards(); renderDetails(); renderTimeline(); renderResults(); $("exceptionCount").textContent = exceptionData.length.toString().padStart(2, "0") + " EXCEPTION TYPES"}
+        function toast(message) {$("toast").textContent = message; $("toast").classList.add("show"); clearTimeout(toast.timer); toast.timer = setTimeout(() => $("toast").classList.remove("show"), 2600)}
+        $("resolveBtn").addEventListener("click", () => {$("modalText").textContent = `Confirm that the required corrective action for ${selected().name} (${selected().code}) has been completed for bag BG-20481.`; $("confirmModal").classList.add("show")});
+        $("cancelModal").addEventListener("click", () => $("confirmModal").classList.remove("show"));
+        $("confirmModal").addEventListener("click", e => {if (e.target === $("confirmModal")) $("confirmModal").classList.remove("show")});
+        $("confirmResolve").addEventListener("click", () => {const x = selected(); resolved[x.id] = true; save(); $("confirmModal").classList.remove("show"); renderAll(); toast(x.name + " marked as resolved.")});
+        $("reopenBtn").addEventListener("click", () => {const x = selected(); delete resolved[x.id]; save(); renderAll(); toast(x.name + " has been reopened.")});
+        $("searchInput").addEventListener("input", renderResults); $("filterSelect").addEventListener("change", renderResults);
+        document.addEventListener("keydown", e => {if (e.key === "Escape") $("confirmModal").classList.remove("show")});
+        renderAll();
+    </script>
+</body>
+
+</html>
