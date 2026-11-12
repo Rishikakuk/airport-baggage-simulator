@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SkyFlow - Module 03: Baggage Tracking & Status. Real-time airport baggage tracking simulator for Bag ID BG-20481.">
+  <title>Baggage Tracking Simulator | SkyFlow (Bag: BG-20481)</title>
+  
+  <style>
+/* ==========================================================================
+   SkyFlow - Airport Baggage Handling & Tracking Management System
+   Module 3: Baggage Tracking & Status
+   Design matches Module 2 (Handling Simulator) theme:
+   Dark Navy Midnight Background, Cyan Accents, Translucent Cards, Live Indicators
+   ========================================================================== */
+
+/* --- 1. CSS Theme Variables --- */
+:root {
+  /* Midnight Aviation Palette */
+  --bg-main: #080e1e;            /* Deep midnight background */
+  --bg-gradient: linear-gradient(180deg, #070d1d 0%, #0b152d 100%);
+  --card-bg: #0f1c3a;            /* Dark card surface */
+  --card-bg-subtle: #132247;     /* Inner card highlight */
+  --card-border: #1d2c52;        /* Subtle border */
+  --card-border-focus: #38bdf8;  /* Cyan glow border */
+
+  /* Brand Accents */
+  --brand-blue: #2563eb;         /* SkyFlow Royal Blue Logo */
+  --accent-cyan: #38bdf8;        /* SkyFlow Bright Cyan */
+  --accent-cyan-glow: rgba(56, 189, 248, 0.25);
+  --accent-blue-hover: #1d4ed8;
+
+  /* Status Colors */
+  --status-completed: #10b981;   /* Emerald Green */
+  --status-completed-bg: rgba(16, 185, 129, 0.15);
+  --status-completed-border: rgba(16, 185, 129, 0.35);
+
+  --status-inprogress: #38bdf8;  /* Bright Cyan / In Transit */
+  --status-inprogress-bg: rgba(56, 189, 248, 0.15);
+  --status-inprogress-border: rgba(56, 189, 248, 0.35);
+
+  --status-warning: #f59e0b;     /* Amber */
+  --status-warning-bg: rgba(245, 158, 11, 0.15);
+  --status-warning-border: rgba(245, 158, 11, 0.35);
+
+  --status-pending: #475569;     /* Slate */
+  --status-pending-bg: rgba(71, 85, 105, 0.2);
+  --status-pending-border: #334155;
+
+  /* Typography Colors */
+  --text-white: #ffffff;
+  --text-dim: #cbd5e1;
+  --text-muted: #8a9bb2;
+  --text-label: #64748b;
+
+  /* UI Spacing & Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- 2. Base Reset --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--bg-main);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text-white);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  width: 92%;
+  max-width: 1220px;
+  margin: 0 auto;
+}
+
+/* --- 3. Top Header --- */
+.site-header {
+  background: rgba(8, 14, 30, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--card-border);
+  padding: 1.1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.brand-logo-icon {
+  width: 40px;
+  height: 40px;
+  background-color: var(--brand-blue);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.brand-text h1 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.brand-tagline {
+  font-size: 0.72rem;
+  color: var(--text-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.live-system-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* --- 4. Module Navigation Tabs --- */
+.module-nav {
+  background: rgba(11, 21, 45, 0.6);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.65rem 0;
+  list-style: none;
+}
+
+.module-link {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.module-link:hover {
+  color: var(--text-white);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.module-link.active {
+  color: var(--accent-cyan);
+  background: var(--card-bg-subtle);
+  border-color: rgba(56, 189, 248, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.module-num {
+  font-size: 0.72rem;
+  opacity: 0.75;
+}
+
+/* --- 5. Main Hero Section --- */
+.hero-section {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  padding: 2.5rem 0 1.75rem;
+}
+
+.hero-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.module-badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+  margin-bottom: 0.85rem;
+}
+
+.hero-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-white);
+  margin-bottom: 0.85rem;
+}
+
+.hero-title .highlight {
+  color: var(--accent-cyan);
+}
+
+.hero-desc {
+  font-size: 0.98rem;
+  color: var(--text-muted);
+  max-width: 580px;
+  line-height: 1.55;
+}
+
+/* Active Flight Widget */
+.active-flight-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.35rem 1.75rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.flight-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.flight-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.flight-number {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--accent-cyan);
+  letter-spacing: 0.05em;
+}
+
+.flight-route-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.route-point {
+  text-align: left;
+}
+
+.route-point.dest {
+  text-align: right;
+}
+
+.route-iata {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-white);
+  line-height: 1;
+}
+
+.route-city-name {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+  font-weight: 500;
+}
+
+.route-plane-icon {
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+}
+
+/* --- 6. Baggage Identification Bar --- */
+.baggage-id-bar {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.75rem;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  margin-bottom: 1.75rem;
+}
+
+.id-col-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.luggage-icon-box {
+  width: 44px;
+  height: 44px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-cyan);
+  flex-shrink: 0;
+}
+
+.info-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.info-val-large {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-white);
+  letter-spacing: 0.04em;
+}
+
+.info-val-standard {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-white);
+  letter-spacing: 0.02em;
+}
+
+.status-badge-live {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--accent-cyan);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* --- 7. Search Console Card --- */
+.search-console-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.search-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.search-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-white);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-form {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.search-input-wrap {
+  flex: 1;
+  min-width: 260px;
+  position: relative;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  background: #0b152d;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1rem 0.8rem 2.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-white);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--card-border-focus);
+  box-shadow: 0 0 0 3px var(--accent-cyan-glow);
+}
+
+.search-input::placeholder {
+  text-transform: none;
+  font-weight: 400;
+  color: var(--text-label);
+}
+
+.btn-search {
+  background: var(--brand-blue);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1.75rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-search:hover {
+  background: var(--accent-blue-hover);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.chips-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.chips-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.chip-btn {
+  background: #132247;
+  border: 1px solid var(--card-border);
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chip-btn:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.error-message-bar {
+  display: none;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-top: 0.85rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* --- 8. Baggage Control Center / Progress Card --- */
+.control-center-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem 1.75rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.control-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1.25rem;
+}
+
+.control-subtitle {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.control-main-heading {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--text-white);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.control-percent-box {
+  text-align: right;
+}
+
+.control-percent-num {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--accent-cyan);
+  line-height: 1;
+}
+
+.control-percent-sub {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: #132247;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1.75rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb 0%, #38bdf8 100%);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px var(--accent-cyan);
+}
+
+.stepper-nodes-row {
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+  position: relative;
+  gap: 0.5rem;
+}
+
+.step-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 18%;
+}
+
+.node-bullet {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #0b152d;
+  border: 2px solid #29385c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  transition: all 0.3s;
+}
+
+.step-node.completed .node-bullet {
+  background: var(--status-completed);
+  border-color: var(--status-completed);
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.step-node.inprogress .node-bullet {
+  background: var(--card-bg-subtle);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  box-shadow: 0 0 0 4px var(--accent-cyan-glow);
+  animation: radar-pulse 2s infinite;
+}
+
+@keyframes radar-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.6); }
+  70% { box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+}
+
+.step-node.pending .node-bullet {
+  border: 2px dashed #334155;
+  color: #475569;
+}
+
+.node-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+.step-node.completed .node-title { color: var(--text-white); }
+.step-node.inprogress .node-title { color: var(--accent-cyan); }
+.step-node.pending .node-title { color: #64748b; }
+
+.control-sim-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.location-scan-text {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.location-scan-text strong {
+  color: var(--accent-cyan);
+}
+
+.btn-simulate-checkpoint {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: var(--accent-cyan);
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-simulate-checkpoint:hover {
+  background: var(--accent-cyan);
+  color: #070d1d;
+  box-shadow: 0 0 15px var(--accent-cyan-glow);
+}
+
+/* --- 9. Two-Column Dashboard --- */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 1.75rem;
+  align-items: start;
+  margin-bottom: 3rem;
+}
+
+.manifest-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem 1.75rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.manifest-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.manifest-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-white);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.flight-code-pill {
+  background: var(--brand-blue);
+  color: #ffffff;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.manifest-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.15rem 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.manifest-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.manifest-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.manifest-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.manifest-val.cyan {
+  color: var(--accent-cyan);
+}
+
+.carousel-box {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+}
+
+.barcode-box {
+  border-top: 1px dashed var(--card-border);
+  padding-top: 1.25rem;
+  text-align: center;
+}
+
+.barcode-stripes {
+  display: inline-flex;
+  gap: 3px;
+  height: 38px;
+  align-items: stretch;
+  margin-bottom: 0.35rem;
+}
+
+.bar {
+  background: #cbd5e1;
+  width: 2px;
+}
+.bar.thick { width: 4.5px; }
+.bar.medium { width: 3px; }
+.bar.thin { width: 1.5px; }
+
+.barcode-digits {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--text-muted);
+}
+
+.timeline-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem 1.75rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--card-border);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.timeline-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-white);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-group {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.legend-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.legend-dot.c { background: var(--status-completed); }
+.legend-dot.i { background: var(--accent-cyan); }
+.legend-dot.p { background: #475569; }
+
+.timeline-list {
+  list-style: none;
+  position: relative;
+  padding-left: 28px;
+}
+
+.timeline-list::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 9px;
+  width: 2px;
+  background: var(--card-border);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -28px;
+  top: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #0b152d;
+  border: 3px solid var(--card-border);
+  z-index: 2;
+  box-sizing: border-box;
+  transition: all 0.3s;
+}
+
+.timeline-item.completed::before {
+  background: var(--status-completed);
+  border-color: var(--status-completed);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.timeline-item.completed .timeline-box {
+  border-left: 3px solid var(--status-completed);
+}
+
+.timeline-item.inprogress::before {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px var(--accent-cyan);
+}
+
+.timeline-item.inprogress .timeline-box {
+  border-left: 3px solid var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.timeline-item.pending::before {
+  background: #0b152d;
+  border: 2px dashed #475569;
+}
+
+.timeline-item.pending .timeline-box {
+  border-left: 3px solid #334155;
+  opacity: 0.7;
+}
+
+.timeline-box {
+  background: #0b152d;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 0.95rem 1.25rem;
+}
+
+.timeline-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.stage-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.badge-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: 50px;
+}
+
+.badge-tag.completed {
+  background: var(--status-completed-bg);
+  border: 1px solid var(--status-completed-border);
+  color: var(--status-completed);
+}
+
+.badge-tag.inprogress {
+  background: var(--status-inprogress-bg);
+  border: 1px solid var(--status-inprogress-border);
+  color: var(--accent-cyan);
+}
+
+.badge-tag.pending {
+  background: var(--status-pending-bg);
+  border: 1px solid var(--status-pending-border);
+  color: var(--text-muted);
+}
+
+.stage-location {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.stage-time {
+  font-size: 0.75rem;
+  color: var(--text-label);
+  font-family: monospace;
+}
+
+.stage-desc {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin-top: 0.4rem;
+  line-height: 1.45;
+}
+
+.site-footer {
+  background: #050a17;
+  border-top: 1px solid var(--card-border);
+  padding: 2rem 0 1.5rem;
+  margin-top: auto;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-inner a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+}
+
+.footer-inner a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 950px) {
+  .hero-section {
+    grid-template-columns: 1fr;
+  }
+  .baggage-id-bar {
+    grid-template-columns: 1fr 1fr;
+  }
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-title {
+    font-size: 2.2rem;
+  }
+  .baggage-id-bar {
+    grid-template-columns: 1fr;
+  }
+  .search-form {
+    flex-direction: column;
+  }
+  .btn-search {
+    width: 100%;
+    justify-content: center;
+  }
+  .stepper-nodes-row {
+    flex-wrap: wrap;
+  }
+  .step-node {
+    width: 30%;
+    margin-bottom: 1rem;
+  }
+}
+  </style>
+</head>
+<body>
+
+  <!-- 1. Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <div class="brand-wrapper">
+          <div class="brand-logo-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1>SKYFLOW</h1>
+            <p class="brand-tagline">AIRPORT OPERATIONS</p>
+          </div>
+        </div>
+
+        <div class="live-system-badge">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span>LIVE SYSTEM</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. Navigation -->
+  <nav class="module-nav" aria-label="SkyFlow Airport System Modules">
+    <div class="container">
+      <ul class="nav-tabs">
+        <li>
+          <a href="registration.html" class="module-link" title="Module 01: Baggage Registration">
+            <span class="module-num">01</span>
+            <span>REGISTRATION</span>
+          </a>
+        </li>
+        <li>
+          <a href="handling.html" class="module-link" title="Module 02: Handling Simulator">
+            <span class="module-num">02</span>
+            <span>HANDLING SIMULATOR</span>
+          </a>
+        </li>
+        <li>
+          <a href="baggage-tracking.html" class="module-link active" title="Module 03: Baggage Tracking & Status (Current)">
+            <span class="module-num">03</span>
+            <span>TRACKING &amp; STATUS</span>
+          </a>
+        </li>
+        <li>
+          <a href="exceptions.html" class="module-link" title="Module 04: Exception Handling">
+            <span class="module-num">04</span>
+            <span>EXCEPTIONS</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- 3. Main Content -->
+  <main class="container">
+
+    <!-- Section A: Hero Banner + Active Flight Card -->
+    <section class="hero-section" aria-label="Tracking Simulator Overview">
+      <div class="hero-left">
+        <span class="module-badge">MODULE 03 &bull; TRACKING SIMULATOR</span>
+        <h2 class="hero-title">
+          Follow the status<br>
+          of your <span class="highlight">bag.</span>
+        </h2>
+        <p class="hero-desc">
+          Tracking primary project luggage <strong>BG-20481</strong> across all airport handling checkpoints &mdash; from check-in to aircraft loading and carousel delivery.
+        </p>
+      </div>
+
+      <aside class="active-flight-card" aria-label="Active Flight Information">
+        <div class="flight-header-row">
+          <span class="flight-label">ACTIVE FLIGHT</span>
+          <span class="flight-number" id="flightNoHeader">AI 203</span>
+        </div>
+
+        <div class="flight-route-display">
+          <div class="route-point">
+            <div class="route-iata" id="originCode">ATQ</div>
+            <div class="route-city-name" id="originCity">Amritsar</div>
+          </div>
+
+          <div class="route-plane-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+            </svg>
+          </div>
+
+          <div class="route-point dest">
+            <div class="route-iata" id="destCode">DEL</div>
+            <div class="route-city-name" id="destCity">Delhi</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- Section B: Baggage Identification Bar -->
+    <section class="baggage-id-bar" aria-label="Baggage Identification Summary">
+      <div class="id-col-main">
+        <div class="luggage-icon-box" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="7" width="18" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="info-label">BAGGAGE IDENTIFICATION</div>
+          <div class="info-val-large" id="barBagId">BG-20481</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="info-label">TYPE</div>
+        <div class="info-val-standard" id="barBagType">CHECKED BAG</div>
+      </div>
+
+      <div>
+        <div class="info-label">WEIGHT</div>
+        <div class="info-val-standard" id="barBagWeight">18.4 KG</div>
+      </div>
+
+      <div>
+        <div class="info-label">STATUS</div>
+        <div class="status-badge-live" id="barBagStatus">IN TRANSIT</div>
+      </div>
+    </section>
+
+    <!-- Section C: Search Console -->
+    <section class="search-console-card" aria-label="Search Baggage Console">
+      <div class="search-title-row">
+        <h3 class="search-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          Search Baggage by Tag ID
+        </h3>
+        <span style="font-size: 0.8rem; color: #8a9bb2;">Look up common project Bag ID <strong>BG-20481</strong> or any custom barcode</span>
+      </div>
+
+      <form id="searchForm" class="search-form" novalidate>
+        <div class="search-input-wrap">
+          <svg class="search-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+          <input 
+            type="text" 
+            id="bagInput" 
+            class="search-input" 
+            placeholder="e.g. BG-20481" 
+            value="BG-20481"
+            autocomplete="off"
+            aria-label="Baggage Tag ID"
+          >
+        </div>
+        <button type="submit" class="btn-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          Track Baggage
+        </button>
+      </form>
+
+      <div id="errorBox" class="error-message-bar" role="alert">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span id="errorText">Error message placeholder</span>
+      </div>
+
+      <!-- Quick Test Chips -->
+      <div class="chips-row">
+        <span class="chips-label">View BG-20481 at Stages:</span>
+        <button type="button" class="chip-btn" data-id="BG-20481" title="In Flight AI 203 to Delhi">
+          ✈️ BG-20481 (In-Flight Transit)
+        </button>
+        <button type="button" class="chip-btn" data-id="BG-20481-CLAIM" title="Arrived at Delhi Carousel 02">
+          🛄 BG-20481 (At Carousel 02)
+        </button>
+        <button type="button" class="chip-btn" data-id="BG-20481-SORT" title="Automated sorting conveyor">
+          🔄 BG-20481 (Conveyor Sortation)
+        </button>
+        <button type="button" class="chip-btn" data-id="BG-20481-SEC" title="X-Ray security screening">
+          🛡️ BG-20481 (Security Check)
+        </button>
+      </div>
+    </section>
+
+    <!-- Section D: Baggage Control Center & Progress -->
+    <section class="control-center-card" aria-label="Baggage Control Center Progress">
+      <div class="control-header-row">
+        <div>
+          <div class="control-subtitle">BAGGAGE CONTROL CENTER</div>
+          <div class="control-main-heading" id="controlHeading">In-Flight Transit</div>
+        </div>
+        <div class="control-percent-box">
+          <div class="control-percent-num" id="controlPercent">70%</div>
+          <div class="control-percent-sub">COMPLETE</div>
+        </div>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width: 70%;"></div>
+      </div>
+
+      <ol class="stepper-nodes-row">
+        <li class="step-node completed" id="step1">
+          <div class="node-bullet" aria-hidden="true">✓</div>
+          <div class="node-title">1. Check-In</div>
+        </li>
+        <li class="step-node completed" id="step2">
+          <div class="node-bullet" aria-hidden="true">✓</div>
+          <div class="node-title">2. Security</div>
+        </li>
+        <li class="step-node completed" id="step3">
+          <div class="node-bullet" aria-hidden="true">✓</div>
+          <div class="node-title">3. Sorting</div>
+        </li>
+        <li class="step-node inprogress" id="step4">
+          <div class="node-bullet" aria-hidden="true">✈</div>
+          <div class="node-title">4. Loading / Flight</div>
+        </li>
+        <li class="step-node pending" id="step5">
+          <div class="node-bullet" aria-hidden="true">5</div>
+          <div class="node-title">5. Baggage Claim</div>
+        </li>
+      </ol>
+
+      <div class="control-sim-bar">
+        <div class="location-scan-text">
+          Current Location: <strong id="scanLocationText">Cargo Hold Bay 1A - Flight AI 203</strong>
+        </div>
+        <button type="button" class="btn-simulate-checkpoint" id="btnSimulateNext" title="Advance BG-20481 to next checkpoint for presentation">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Simulate Next Checkpoint
+        </button>
+      </div>
+    </section>
+
+    <!-- Section E: Two-Column Dashboard (Manifest Details + Audit Timeline) -->
+    <div class="dashboard-grid">
+
+      <!-- Column 1: Flight & Baggage Manifest Card -->
+      <article class="manifest-card" aria-label="Flight and Luggage Manifest Details">
+        <div class="manifest-header">
+          <h3 class="manifest-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            Flight Manifest &amp; Bag Specs
+          </h3>
+          <span class="flight-code-pill" id="manifestFlight">AI 203</span>
+        </div>
+
+        <div class="manifest-details-grid">
+          <div class="manifest-item">
+            <span class="manifest-label">Passenger Name</span>
+            <span class="manifest-val" id="manifestPassenger">Vansh Sharma</span>
+          </div>
+          <div class="manifest-item">
+            <span class="manifest-label">Booking PNR</span>
+            <span class="manifest-val cyan" id="manifestPnr">AI-78219</span>
+          </div>
+          <div class="manifest-item">
+            <span class="manifest-label">Aircraft Type</span>
+            <span class="manifest-val" id="manifestAircraft">Airbus A320neo</span>
+          </div>
+          <div class="manifest-item">
+            <span class="manifest-label">Assigned Seat</span>
+            <span class="manifest-val" id="manifestSeat">14B (Economy)</span>
+          </div>
+          <div class="manifest-item">
+            <span class="manifest-label">Registered Weight</span>
+            <span class="manifest-val" id="manifestWeight">18.4 KG</span>
+          </div>
+          <div class="manifest-item">
+            <span class="manifest-label">Baggage Classification</span>
+            <span class="manifest-val" id="manifestType">CHECKED BAG</span>
+          </div>
+          <div class="manifest-item" style="grid-column: span 2;">
+            <span class="manifest-label">Arrival Claim Carousel</span>
+            <div class="carousel-box" id="manifestCarousel">Carousel 02 (Active)</div>
+          </div>
+        </div>
+
+        <div class="barcode-box">
+          <div class="barcode-stripes" aria-hidden="true">
+            <div class="bar thick"></div><div class="bar thin"></div><div class="bar medium"></div>
+            <div class="bar thin"></div><div class="bar thick"></div><div class="bar thin"></div>
+            <div class="bar medium"></div><div class="bar thick"></div><div class="bar thin"></div>
+            <div class="bar thick"></div><div class="bar thin"></div><div class="bar medium"></div>
+            <div class="bar thin"></div><div class="bar thick"></div><div class="bar medium"></div>
+            <div class="bar thick"></div><div class="bar thin"></div><div class="bar medium"></div>
+            <div class="bar thick"></div><div class="bar thin"></div><div class="bar thick"></div>
+          </div>
+          <div class="barcode-digits" id="barcodeDigits">*BG-20481*</div>
+        </div>
+      </article>
+
+      <!-- Column 2: Status Timeline Card -->
+      <article class="timeline-card" aria-label="Baggage Handling Audit Timeline">
+        <div class="timeline-header">
+          <h3 class="timeline-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            Handling Status Timeline
+          </h3>
+
+          <div class="legend-group">
+            <div class="legend-chip">
+              <span class="legend-dot c"></span>
+              <span>Completed</span>
+            </div>
+            <div class="legend-chip">
+              <span class="legend-dot i"></span>
+              <span>In-Progress</span>
+            </div>
+            <div class="legend-chip">
+              <span class="legend-dot p"></span>
+              <span>Pending</span>
+            </div>
+          </div>
+        </div>
+
+        <ul class="timeline-list" id="timelineList">
+          <!-- Populated by JavaScript -->
+        </ul>
+      </article>
+
+    </div>
+
+  </main>
+
+  <!-- 4. Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>SKYFLOW Airport Operations</strong> &bull; Module 03: Baggage Tracking &amp; Status (Bag ID: BG-20481)
+      </div>
+      <div>
+        Designed with semantic HTML5, CSS3 &amp; Vanilla JavaScript &bull; Ready for GitHub Team Integration
+      </div>
+    </div>
+  </footer>
+
+  <script>
+/**
+ * SkyFlow - Airport Baggage Handling & Tracking Management System
+ * Module 3: Baggage Tracking & Status
+ * Team Common Bag ID: BG-20481
+ */
+
+const baggageDatabase = {
+  // Main in-flight transit state
+  "BG-20481": {
+    bagId: "BG-20481",
+    flightNumber: "AI 203",
+    airline: "Air India",
+    aircraft: "Airbus A320neo",
+    passengerName: "Vansh Sharma",
+    pnr: "AI-78219",
+    seat: "14B (Economy)",
+    originCode: "ATQ",
+    originCity: "Amritsar (ATQ)",
+    originTime: "04:15 PM",
+    destCode: "DEL",
+    destCity: "Delhi (DEL)",
+    destTime: "05:30 PM",
+    bagWeight: "18.4 KG",
+    bagType: "CHECKED BAG",
+    carousel: "Carousel 02 (Active)",
+    currentStatus: "IN TRANSIT",
+    currentLocation: "Cargo Hold Bay 1A - Flight AI 203",
+    controlHeading: "In-Flight Transit",
+    lastScanned: "Scanned at Ramp Loading Conveyor (ATQ)",
+    lastTimestamp: "03:55 PM, Today",
+    nextMilestone: "Arrival & Unloading at Delhi T3 (~35 mins)",
+    progressPercent: 70,
+    stages: [
+      {
+        id: 1,
+        title: "Check-In & Registration",
+        location: "Amritsar T1 - Counter A03",
+        timestamp: "02:45 PM",
+        status: "completed",
+        desc: "Bag weighed (18.4 KG), tagged with barcode BG-20481 and assigned to Flight AI 203."
+      },
+      {
+        id: 2,
+        title: "Automated Security Screening",
+        location: "BHS Inline Dual-Energy X-Ray",
+        timestamp: "03:10 PM",
+        status: "completed",
+        desc: "Automated explosive and prohibited items screening passed. Status: CLEARED."
+      },
+      {
+        id: 3,
+        title: "Sortation & Conveyor Movement",
+        location: "Departure Sortation Belt #02",
+        timestamp: "03:35 PM",
+        status: "completed",
+        desc: "Dispatched down high-speed baggage conveyor to Flight AI 203 staging cart."
+      },
+      {
+        id: 4,
+        title: "Aircraft Loading & En Route",
+        location: "Cargo Hold Bay 1A - Flight AI 203",
+        timestamp: "03:55 PM",
+        status: "inprogress",
+        desc: "Loaded into aircraft cargo compartment. Flight currently en route to Delhi (cruising 32,000 ft)."
+      },
+      {
+        id: 5,
+        title: "Arrival Baggage Claim Delivery",
+        location: "Delhi IGI Terminal 3 - Carousel 02",
+        timestamp: "Est. 05:45 PM",
+        status: "pending",
+        desc: "Scheduled for transfer to arrivals claim conveyor upon landing."
+      }
+    ]
+  },
+
+  // Carousel ready state
+  "BG-20481-CLAIM": {
+    bagId: "BG-20481",
+    flightNumber: "AI 203",
+    airline: "Air India",
+    aircraft: "Airbus A320neo",
+    passengerName: "Vansh Sharma",
+    pnr: "AI-78219",
+    seat: "14B (Economy)",
+    originCode: "ATQ",
+    originCity: "Amritsar (ATQ)",
+    originTime: "04:15 PM",
+    destCode: "DEL",
+    destCity: "Delhi (DEL)",
+    destTime: "05:30 PM",
+    bagWeight: "18.4 KG",
+    bagType: "CHECKED BAG",
+    carousel: "Carousel 02 (Active)",
+    currentStatus: "READY AT CLAIM",
+    currentLocation: "Arrivals Hall Carousel 02 - Delhi T3",
+    controlHeading: "Ready for Collection",
+    lastScanned: "Scanned at Carousel 02 Feed Belt",
+    lastTimestamp: "05:42 PM, Today",
+    nextMilestone: "Collection by Passenger at Carousel 02",
+    progressPercent: 100,
+    stages: [
+      {
+        id: 1,
+        title: "Check-In & Registration",
+        location: "Amritsar T1 - Counter A03",
+        timestamp: "02:45 PM",
+        status: "completed",
+        desc: "Bag weighed (18.4 KG), tagged with barcode BG-20481."
+      },
+      {
+        id: 2,
+        title: "Automated Security Screening",
+        location: "BHS Inline Dual-Energy X-Ray",
+        timestamp: "03:10 PM",
+        status: "completed",
+        desc: "Security scan cleared."
+      },
+      {
+        id: 3,
+        title: "Sortation & Conveyor Movement",
+        location: "Departure Sortation Belt #02",
+        timestamp: "03:35 PM",
+        status: "completed",
+        desc: "Dispatched to Flight AI 203."
+      },
+      {
+        id: 4,
+        title: "Aircraft Loading & En Route",
+        location: "Flight AI 203 Cargo Hold",
+        timestamp: "05:30 PM",
+        status: "completed",
+        desc: "Flight landed safely at Delhi IGI Airport."
+      },
+      {
+        id: 5,
+        title: "Arrival Baggage Claim Delivery",
+        location: "Delhi IGI Terminal 3 - Carousel 02",
+        timestamp: "05:42 PM",
+        status: "completed",
+        desc: "Bag placed on baggage claim carousel 02. Ready for pickup."
+      }
+    ]
+  },
+
+  // Conveyor sorting state
+  "BG-20481-SORT": {
+    bagId: "BG-20481",
+    flightNumber: "AI 203",
+    airline: "Air India",
+    aircraft: "Airbus A320neo",
+    passengerName: "Vansh Sharma",
+    pnr: "AI-78219",
+    seat: "14B (Economy)",
+    originCode: "ATQ",
+    originCity: "Amritsar (ATQ)",
+    originTime: "04:15 PM",
+    destCode: "DEL",
+    destCity: "Delhi (DEL)",
+    destTime: "05:30 PM",
+    bagWeight: "18.4 KG",
+    bagType: "CHECKED BAG",
+    carousel: "Carousel 02 (Pending)",
+    currentStatus: "SORTING",
+    currentLocation: "Conveyor Belt #02 - Main Sorting Hub",
+    controlHeading: "Sorting & Conveyor Routing",
+    lastScanned: "Scanned by Optical Barcode Reader Station 04",
+    lastTimestamp: "03:35 PM, Today",
+    nextMilestone: "Loading into Tarmac Cart for Flight AI 203 (~15 mins)",
+    progressPercent: 50,
+    stages: [
+      {
+        id: 1,
+        title: "Check-In & Registration",
+        location: "Amritsar T1 - Counter A03",
+        timestamp: "02:45 PM",
+        status: "completed",
+        desc: "Bag weighed (18.4 KG) and registration verified."
+      },
+      {
+        id: 2,
+        title: "Automated Security Screening",
+        location: "BHS Inline Dual-Energy X-Ray",
+        timestamp: "03:10 PM",
+        status: "completed",
+        desc: "Security inspection passed without anomalies."
+      },
+      {
+        id: 3,
+        title: "Sortation & Conveyor Movement",
+        location: "Conveyor Belt #02 - Sorting Hub",
+        timestamp: "03:35 PM",
+        status: "inprogress",
+        desc: "Bag traveling along automated tilt-tray conveyor toward Flight AI 203."
+      },
+      {
+        id: 4,
+        title: "Aircraft Loading & En Route",
+        location: "Apron Stand 12",
+        timestamp: "Est. 03:50 PM",
+        status: "pending",
+        desc: "Scheduled for aircraft hold loading."
+      },
+      {
+        id: 5,
+        title: "Arrival Baggage Claim Delivery",
+        location: "Delhi T3 - Carousel 02",
+        timestamp: "Est. 05:45 PM",
+        status: "pending",
+        desc: "Scheduled for carousel delivery."
+      }
+    ]
+  },
+
+  // Security screening state
+  "BG-20481-SEC": {
+    bagId: "BG-20481",
+    flightNumber: "AI 203",
+    airline: "Air India",
+    aircraft: "Airbus A320neo",
+    passengerName: "Vansh Sharma",
+    pnr: "AI-78219",
+    seat: "14B (Economy)",
+    originCode: "ATQ",
+    originCity: "Amritsar (ATQ)",
+    originTime: "04:15 PM",
+    destCode: "DEL",
+    destCity: "Delhi (DEL)",
+    destTime: "05:30 PM",
+    bagWeight: "18.4 KG",
+    bagType: "CHECKED BAG",
+    carousel: "Carousel 02 (Pending)",
+    currentStatus: "SECURITY SCAN",
+    currentLocation: "BHS Security Screening Pod 02",
+    controlHeading: "Security Inspection",
+    lastScanned: "Scanned at Level 1 In-line CT Scanner",
+    lastTimestamp: "03:10 PM, Today",
+    nextMilestone: "Conveyor Sortation to Flight AI 203",
+    progressPercent: 30,
+    stages: [
+      {
+        id: 1,
+        title: "Check-In & Registration",
+        location: "Amritsar T1 - Counter A03",
+        timestamp: "02:45 PM",
+        status: "completed",
+        desc: "Bag drop completed. Tag BG-20481 issued."
+      },
+      {
+        id: 2,
+        title: "Automated Security Screening",
+        location: "BHS Security Screening Pod 02",
+        timestamp: "03:10 PM",
+        status: "inprogress",
+        desc: "Automated radiological and explosive trace detection in progress."
+      },
+      {
+        id: 3,
+        title: "Sortation & Conveyor Movement",
+        location: "Sorting Chute #02",
+        timestamp: "Est. 03:30 PM",
+        status: "pending",
+        desc: "Awaiting security clearance."
+      },
+      {
+        id: 4,
+        title: "Aircraft Loading & En Route",
+        location: "Apron Stand 12",
+        timestamp: "Est. 03:50 PM",
+        status: "pending",
+        desc: "Scheduled for cargo container placement."
+      },
+      {
+        id: 5,
+        title: "Arrival Baggage Claim Delivery",
+        location: "Delhi T3 - Carousel 02",
+        timestamp: "Est. 05:45 PM",
+        status: "pending",
+        desc: "Scheduled for claim hall delivery."
+      }
+    ]
+  }
+};
+
+let currentBag = baggageDatabase["BG-20481"];
+
+document.addEventListener("DOMContentLoaded", () => {
+  const searchForm = document.getElementById("searchForm");
+  const bagInput = document.getElementById("bagInput");
+  const chipButtons = document.querySelectorAll(".chip-btn");
+  const simulateBtn = document.getElementById("btnSimulateNext");
+
+  renderBaggageView(currentBag);
+
+  if (searchForm) {
+    searchForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const query = bagInput.value.trim().toUpperCase();
+
+      if (!query) {
+        showError("Please enter a valid Bag ID (e.g. BG-20481).");
+        return;
+      }
+
+      hideError();
+      loadBaggage(query);
+    });
+  }
+
+  chipButtons.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const id = chip.getAttribute("data-id");
+      if (id) {
+        bagInput.value = "BG-20481";
+        hideError();
+        loadBaggage(id);
+      }
+    });
+  });
+
+  if (simulateBtn) {
+    simulateBtn.addEventListener("click", () => {
+      simulateStep();
+    });
+  }
+});
+
+function loadBaggage(id) {
+  let normalizedId = id.toUpperCase();
+  if (!normalizedId.includes("-") && normalizedId.length > 2) {
+    normalizedId = normalizedId.slice(0, 2) + "-" + normalizedId.slice(2);
+  }
+
+  if (baggageDatabase[id]) {
+    currentBag = JSON.parse(JSON.stringify(baggageDatabase[id]));
+    renderBaggageView(currentBag);
+  } else if (baggageDatabase[normalizedId]) {
+    currentBag = JSON.parse(JSON.stringify(baggageDatabase[normalizedId]));
+    renderBaggageView(currentBag);
+  } else {
+    currentBag = generateCustomBag(id);
+    renderBaggageView(currentBag);
+  }
+}
+
+function generateCustomBag(id) {
+  return {
+    bagId: id,
+    flightNumber: "AI 203",
+    airline: "Air India",
+    aircraft: "Airbus A320neo",
+    passengerName: "Vansh Sharma",
+    pnr: "AI-78219",
+    seat: "14B (Economy)",
+    originCode: "ATQ",
+    originCity: "Amritsar (ATQ)",
+    originTime: "04:15 PM",
+    destCode: "DEL",
+    destCity: "Delhi (DEL)",
+    destTime: "05:30 PM",
+    bagWeight: "18.4 KG",
+    bagType: "CHECKED BAG",
+    carousel: "Carousel 02 (Active)",
+    currentStatus: "IN TRANSIT",
+    currentLocation: "Cargo Hold Bay 1A - Flight AI 203",
+    controlHeading: "In-Flight Transit",
+    lastScanned: "Scanned at Outbound Ramp Bay",
+    lastTimestamp: "Just now",
+    nextMilestone: "Arrival at Delhi T3 Baggage Claim",
+    progressPercent: 70,
+    stages: [
+      {
+        id: 1,
+        title: "Check-In & Registration",
+        location: "Amritsar T1 - Check-In Desk",
+        timestamp: "02:45 PM",
+        status: "completed",
+        desc: "Bag ID " + id + " verified and tagged."
+      },
+      {
+        id: 2,
+        title: "Automated Security Screening",
+        location: "BHS Screening Station",
+        timestamp: "03:10 PM",
+        status: "completed",
+        desc: "Screening cleared."
+      },
+      {
+        id: 3,
+        title: "Sortation & Conveyor Movement",
+        location: "Conveyor Sort Line #02",
+        timestamp: "03:35 PM",
+        status: "completed",
+        desc: "Routed to Flight AI 203 container."
+      },
+      {
+        id: 4,
+        title: "Aircraft Loading & En Route",
+        location: "Aircraft Cargo Hold Bay 1A",
+        timestamp: "03:55 PM",
+        status: "inprogress",
+        desc: "Cruising en route to Delhi."
+      },
+      {
+        id: 5,
+        title: "Arrival Baggage Claim Delivery",
+        location: "Delhi T3 - Carousel 02",
+        timestamp: "Est. 05:45 PM",
+        status: "pending",
+        desc: "Scheduled for carousel placement post-landing."
+      }
+    ]
+  };
+}
+
+function renderBaggageView(bag) {
+  document.getElementById("flightNoHeader").textContent = bag.flightNumber;
+  document.getElementById("originCode").textContent = bag.originCode;
+  document.getElementById("originCity").textContent = bag.originCity.split("(")[0].trim();
+  document.getElementById("destCode").textContent = bag.destCode;
+  document.getElementById("destCity").textContent = bag.destCity.split("(")[0].trim();
+
+  document.getElementById("barBagId").textContent = bag.bagId;
+  document.getElementById("barBagType").textContent = bag.bagType;
+  document.getElementById("barBagWeight").textContent = bag.bagWeight;
+  document.getElementById("barBagStatus").textContent = bag.currentStatus;
+
+  document.getElementById("controlHeading").textContent = bag.controlHeading || bag.currentStatus;
+  document.getElementById("controlPercent").textContent = bag.progressPercent + "%";
+  document.getElementById("progressFill").style.width = bag.progressPercent + "%";
+  document.getElementById("scanLocationText").textContent = bag.currentLocation;
+
+  const stepNodes = document.querySelectorAll(".step-node");
+  stepNodes.forEach((node, index) => {
+    node.className = "step-node";
+    const stage = bag.stages[index];
+    if (stage) {
+      node.classList.add(stage.status);
+    }
+  });
+
+  document.getElementById("manifestFlight").textContent = bag.flightNumber;
+  document.getElementById("manifestAircraft").textContent = bag.aircraft;
+  document.getElementById("manifestPassenger").textContent = bag.passengerName;
+  document.getElementById("manifestPnr").textContent = bag.pnr;
+  document.getElementById("manifestSeat").textContent = bag.seat;
+  document.getElementById("manifestWeight").textContent = bag.bagWeight;
+  document.getElementById("manifestType").textContent = bag.bagType;
+  document.getElementById("manifestCarousel").textContent = bag.carousel;
+  document.getElementById("barcodeDigits").textContent = `*${bag.bagId}*`;
+
+  renderTimeline(bag.stages);
+}
+
+function renderTimeline(stages) {
+  const list = document.getElementById("timelineList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  stages.forEach((stage) => {
+    const li = document.createElement("li");
+    li.className = `timeline-item ${stage.status}`;
+
+    let badgeText = "Pending";
+    if (stage.status === "completed") badgeText = "Completed";
+    if (stage.status === "inprogress") badgeText = "In Progress";
+
+    li.innerHTML = `
+      <div class="timeline-box">
+        <div class="timeline-top-row">
+          <span class="stage-title">${stage.title}</span>
+          <span class="badge-tag ${stage.status}">${badgeText}</span>
+        </div>
+        <div class="stage-location">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span>${stage.location}</span>
+        </div>
+        <div class="stage-time">Time: ${stage.timestamp}</div>
+        <div class="stage-desc">${stage.desc}</div>
+      </div>
+    `;
+
+    list.appendChild(li);
+  });
+}
+
+function simulateStep() {
+  if (!currentBag || !currentBag.stages) return;
+
+  const currentIdx = currentBag.stages.findIndex((s) => s.status === "inprogress");
+
+  if (currentIdx !== -1 && currentIdx < currentBag.stages.length - 1) {
+    currentBag.stages[currentIdx].status = "completed";
+    currentBag.stages[currentIdx].timestamp = "Verified (Just now)";
+
+    const nextIdx = currentIdx + 1;
+    currentBag.stages[nextIdx].status = "inprogress";
+    currentBag.stages[nextIdx].timestamp = "Active Now";
+
+    currentBag.currentLocation = currentBag.stages[nextIdx].location;
+
+    if (nextIdx === currentBag.stages.length - 1) {
+      currentBag.currentStatus = "READY AT CLAIM";
+      currentBag.controlHeading = "Ready for Collection";
+      currentBag.progressPercent = 100;
+    } else {
+      currentBag.currentStatus = "IN TRANSIT";
+      currentBag.controlHeading = currentBag.stages[nextIdx].title;
+      currentBag.progressPercent = Math.round(((nextIdx + 1) / currentBag.stages.length) * 100);
+    }
+
+    renderBaggageView(currentBag);
+  } else if (currentIdx === currentBag.stages.length - 1) {
+    currentBag.stages[currentIdx].status = "completed";
+    currentBag.currentStatus = "DELIVERED";
+    currentBag.controlHeading = "Claimed by Passenger";
+    currentBag.progressPercent = 100;
+    renderBaggageView(currentBag);
+    alert("Bag BG-20481 has reached Carousel 02 and is ready for collection!");
+  } else {
+    currentBag = JSON.parse(JSON.stringify(baggageDatabase["BG-20481"]));
+    renderBaggageView(currentBag);
+  }
+}
+
+function showError(msg) {
+  const err = document.getElementById("errorBox");
+  const txt = document.getElementById("errorText");
+  if (err && txt) {
+    txt.textContent = msg;
+    err.style.display = "flex";
+  }
+}
+
+function hideError() {
+  const err = document.getElementById("errorBox");
+  if (err) err.style.display = "none";
+}
+  </script>
+</body>
+</html>
